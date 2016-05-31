@@ -13,7 +13,8 @@
     ],
     "require": {
         "php": ">=7.0",
-        "thruster/http-message": "^1.1"
+        "thruster/http-message": "^1.1",
+        "namshi/jose": "^7.1"
     },
     "require-dev": {
         "phpunit/phpunit": "~5.1"
