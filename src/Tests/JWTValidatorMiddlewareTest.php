@@ -41,7 +41,8 @@ class JWTValidatorMiddlewareTest extends \PHPUnit_Framework_TestCase
 
         $modifier = new JWTValidatorMiddleware(
             openssl_pkey_get_public('file://' . __DIR__ . '/Fixtures/public.pem'),
-            'RS256'
+            'RS256',
+            false
         );
 
         $givenResponse = $modifier($request, $response, function ($request, $respone) use ($expected) {
@@ -62,7 +63,7 @@ class JWTValidatorMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($response, $givenResponse);
         };
 
-        $modifier = new JWTValidatorMiddleware('secret', 'RS256');
+        $modifier = new JWTValidatorMiddleware('secret', 'RS256', false);
         $modifier($request, $response, $callback);
     }
 
@@ -83,7 +84,7 @@ class JWTValidatorMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($invalidResponse, $givenResponse);
         };
 
-        $modifier = new JWTValidatorMiddleware('', 'RS256', $invalidResponse);
+        $modifier = new JWTValidatorMiddleware('', 'RS256', false, $invalidResponse);
         $modifier($request, $response, $callback);
     }
 
@@ -103,7 +104,23 @@ class JWTValidatorMiddlewareTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($invalidResponse, $givenResponse);
         };
 
-        $modifier = new JWTValidatorMiddleware('', 'RS256', $invalidResponse);
+        $modifier = new JWTValidatorMiddleware('', 'RS256', false, $invalidResponse);
+        $modifier($request, $response, $callback);
+    }
+
+    public function testMiddlewareAllRequest()
+    {
+        $request = new ServerRequest('GET', '/');
+
+        $response = new Response();
+
+        $invalidResponse = new Response(403);
+
+        $callback = function (ServerRequestInterface $req, ResponseInterface $givenResponse) use ($invalidResponse) {
+            $this->assertEquals($invalidResponse, $givenResponse);
+        };
+
+        $modifier = new JWTValidatorMiddleware('', 'RS256', true, $invalidResponse);
         $modifier($request, $response, $callback);
     }
 }

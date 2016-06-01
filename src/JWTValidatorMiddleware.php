@@ -30,10 +30,20 @@ class JWTValidatorMiddleware
      */
     private $invalidResponse;
 
-    public function __construct($publicKey, string $encoder = 'RS256', ResponseInterface $invalidResponse = null)
-    {
-        $this->publicKey = $publicKey;
-        $this->encoder = $encoder;
+    /**
+     * @var bool
+     */
+    private $allRequests;
+
+    public function __construct(
+        $publicKey,
+        string $encoder = 'RS256',
+        bool $allRequests = false,
+        ResponseInterface $invalidResponse = null
+    ) {
+        $this->publicKey   = $publicKey;
+        $this->encoder     = $encoder;
+        $this->allRequests = $allRequests;
 
         if (null !== $invalidResponse) {
             $this->invalidResponse = $invalidResponse;
@@ -45,7 +55,11 @@ class JWTValidatorMiddleware
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
     {
         if (false === $request->hasHeader('Authorization')) {
-            return $next($request, $response);
+            if (false === $this->allRequests) {
+                return $next($request, $response);
+            }
+
+            return $this->invalidResponse;
         }
 
         $token = $request->getHeaderLine('Authorization');
